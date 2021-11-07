@@ -86,7 +86,8 @@ class Redbook:
 
         url = 'https://www.xiaohongshu.com' + api
         try:
-            r = requests.get(url=url, headers=headers, proxies=proxy_pool, timeout=45)
+            # r = requests.get(url=url, headers=headers, proxies=proxy_pool, timeout=45)
+            r = requests.get(url=url, headers=headers, timeout=45)
         except Exception as e:
             if 'Failed to establish a new connection' in str(e):
                 raise Exception('Proxy host maybe not online')
@@ -112,13 +113,20 @@ class Redbook:
         if data_json['data']['title'] == '':
             data_json['data']['title'] = fc.first_sentence(data_json['data']['desc'])
 
+        match = re.search(r'(\d{4}-\d{2}-\d{2}) ', data_json['data']['time'])
+        if match:
+            post_date = match.group(1)
+        else:
+            post_date = ''
+
         reply_data = {
             'author': data_json['data']['user']['nickname'],
             'fans': data_json['data']['user']['fans'],
             'title': data_json['data']['title'],
             'share': data_json['data']['shareCount'],
             'comments': int(data_json['data']['comments']),
-            'likes': int(data_json['data']['likes'], )
+            'likes': int(data_json['data']['likes'], ),
+            'post_date': post_date,
         }
 
         return reply_data

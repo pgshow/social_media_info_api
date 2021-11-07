@@ -117,7 +117,7 @@ class Weibo:
         self.initialing = True
 
         try:
-            driver.get("https://weibo.com/")
+            driver.get("https://weibo.com/login?tabtype=weibo")
 
             e = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//a[contains(text(), '安全登录')]")))
             time.sleep(3)
@@ -285,13 +285,25 @@ class Weibo:
         author = selector.xpath(r'//div[@class="f14 cla woo-box-flex woo-box-alignCenter woo-box-justifyCenter"]')[0].text.strip()
         title = str(selector.xpath(r"//div[starts-with(@class, 'detail_wbtext_')]/text()")[0]).strip()
 
+        try:
+            post_date_tmp = selector.xpath(r"//a[contains(@class, 'head-info_time_')]")[0].text.strip()
+            match = re.search(r'(\d{1,2}-\d{1,2}) ', post_date_tmp)
+            if match:
+                post_date = '2021-' + match.group(1)
+            else:
+                post_date = ''
+        except:
+            post_date = ''
+
+
         reply_data = {
             'author': author,
             'title': title,
             'fans': int(fans),
             'share': int(share),
             'comments': int(comments),
-            'likes': int(likes)
+            'likes': int(likes),
+            'post_date': post_date,
         }
 
         return reply_data

@@ -90,7 +90,7 @@ class Douyin:
         if self.too_fast():
             return 'Please slow down, interval is 25 seconds'
 
-        logger.info('scraping {url}')
+        logger.info(f'scraping {url}')
 
         self.scraping = True  # 控制只启动一个爬虫
 
@@ -116,7 +116,7 @@ class Douyin:
 
             # 等待页面加载
             WebDriverWait(self.driver, 30).until(EC.presence_of_element_located(
-                (By.XPATH, '//*[@id="root"]/div/div[2]/div[1]/div[1]/div[1]/div[2]/div/div/div[1]/div[1]/span | //div[contains(text(), "你要观看的视频不存在")]')))
+                (By.XPATH, '//*[@id="root"]/div/div[2]/div[1]/div[1]/div[1]/div[2]/div/div/div[1]/div[1] | //div[contains(text(), "你要观看的视频不存在")]')))
 
             if '你要观看的视频不存在' in self.driver.page_source:
                 raise Exception('video not exist')
@@ -159,12 +159,18 @@ class Douyin:
         except:
             raise Exception("can't find author")
 
+        try:
+            post_date = selector.xpath(r"//span[contains(text(), '发布时间')]/text()")[1]
+        except:
+            post_date = ""
+
         reply_data = {
             'author': author,
             'title': title,
             'fans': int(fans),
             'comments': int(comments),
-            'likes': int(likes)
+            'likes': int(likes),
+            'post_date': post_date,
         }
 
         return reply_data
