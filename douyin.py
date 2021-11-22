@@ -142,12 +142,12 @@ class Douyin:
             fans = 0
 
         try:
-            comments = selector.xpath(r'//*[@id="root"]/div/div[2]/div[1]/div[1]/div[1]/div[2]/div/div/div[1]/div[2]/span')[0].text.strip()
+            comments = selector.xpath(r'//*[@id="root"]/div/div[2]/div/div[1]/div[1]/div[3]/div/div/div[1]/div[2]/span')[0].text.strip()
         except:
             comments = 0
 
         try:
-            likes = selector.xpath(r'//*[@id="root"]/div/div[2]/div[1]/div[1]/div[1]/div[2]/div/div/div[1]/div[1]/span')[0].text.strip()
+            likes = selector.xpath(r'//*[@id="root"]/div/div[2]/div/div[1]/div[1]/div[3]/div/div/div[1]/div[1]/div/span')[0].text.strip()
         except:
             likes = 0
 

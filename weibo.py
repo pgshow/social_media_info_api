@@ -259,8 +259,7 @@ class Weibo:
         selector = etree.HTML(html)  # 将源码转化为能被XPath匹配的格式
 
         fans = selector.xpath(r"//div[@class='f14 cla']/div")[0].text
-        if '万' in fans:
-            fans = str(int(float(fans.replace('万', '')) * 10000))
+        fans = self.wan_convert(fans)
 
         data1 = re.findall(r'<\\/em><em>(\d+)<\\/em><\\/span>', html)
         if data1:
@@ -275,12 +274,17 @@ class Weibo:
                 share = str(data2[0]).strip()
                 if share == '转发':
                     share = 0
+
+                share = self.wan_convert(share)
+
                 comments = str(data2[1]).strip()
                 if comments == '评论':
                     comments = 0
             likes = selector.xpath(r"//span[@class='woo-like-count']")[0].text
             if '赞' in likes:
                 likes = 0
+
+            likes = self.wan_convert(likes)
 
         author = selector.xpath(r'//div[@class="f14 cla woo-box-flex woo-box-alignCenter woo-box-justifyCenter"]')[0].text.strip()
         title = str(selector.xpath(r"//div[starts-with(@class, 'detail_wbtext_')]/text()")[0]).strip()
@@ -294,7 +298,6 @@ class Weibo:
                 post_date = ''
         except:
             post_date = ''
-
 
         reply_data = {
             'author': author,
@@ -325,3 +328,10 @@ class Weibo:
         pc_url = f"https://www.weibo.com/{pc_id}/{pc_bid}"
 
         return pc_url
+
+    def wan_convert(self, text):
+        """带万的数值转换"""
+        if isinstance(text, str) and '万' in text:
+            return str(int(float(text.replace('万', '')) * 10000))
+        else:
+            return text
