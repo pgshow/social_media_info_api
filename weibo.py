@@ -9,6 +9,7 @@ import config
 import fc
 from loguru import logger
 from lxml import etree
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -193,7 +194,7 @@ class Weibo:
             return 'Try later, another url is scraping right now'
 
         if self.too_fast():
-            return 'Please slow down, interval is 25 seconds'
+            return 'Please slow down, interval is 45 seconds'
 
         logger.info(f'scraping {url}')
 
@@ -219,6 +220,8 @@ class Weibo:
             if url.startswith('https://weibo.com/u/'):
                 raise Exception('url is illegal')
 
+            print(url)
+
             html = self.chrome_url(url)
 
             return self.extract(html)
@@ -230,7 +233,7 @@ class Weibo:
 
     def too_fast(self):
         """频繁度"""
-        if (datetime.datetime.now() - self.last_scrape_time).seconds < 24:
+        if (datetime.datetime.now() - self.last_scrape_time).seconds < 44:
             return True
         else:
             return False
@@ -258,8 +261,7 @@ class Weibo:
         """获取微博属性"""
         selector = etree.HTML(html)  # 将源码转化为能被XPath匹配的格式
 
-        fans = selector.xpath(r"//div[@class='f14 cla']/div")[0].text
-        fans = self.wan_convert(fans)
+        fans = self.get_fans(selector)
 
         data1 = re.findall(r'<\\/em><em>(\d+)<\\/em><\\/span>', html)
         if data1:
@@ -287,7 +289,13 @@ class Weibo:
             likes = self.wan_convert(likes)
 
         author = selector.xpath(r'//div[@class="f14 cla woo-box-flex woo-box-alignCenter woo-box-justifyCenter"]')[0].text.strip()
-        title = str(selector.xpath(r"//div[starts-with(@class, 'detail_wbtext_')]/text()")[0]).strip()
+
+        titles = selector.xpath(r"//div[starts-with(@class, 'detail_wbtext_')]/text()")
+        title = ''
+        for t in titles:
+            if len(t) > 1:
+                title = str(t).strip()
+                break
 
         try:
             post_date_tmp = selector.xpath(r"//a[contains(@class, 'head-info_time_')]")[0].text.strip()
@@ -335,3 +343,22 @@ class Weibo:
             return str(int(float(text.replace('万', '')) * 10000))
         else:
             return text
+
+    def get_fans(self, selector):
+        """获取微博详细粉丝数"""
+        fans_tmp = selector.xpath(r"//div[@class='f14 cla']/div")[0].text
+        fans_tmp = self.wan_convert(fans_tmp)
+
+        try:
+            self.driver.get('https://weibo.com/ajax/profile/info?custom=1006067062715824')
+
+            # Selenium 网页源码转换为 json
+            html = self.driver.page_source
+            soup = BeautifulSoup(html, 'lxml')
+            ss = soup.select('pre')[0]
+            res = json.loads(ss.text)
+
+            fans = res['data']['user']['followers_count']
+            return fans
+        except:
+            return fans_tmp
