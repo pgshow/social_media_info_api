@@ -350,7 +350,10 @@ class Weibo:
         fans_tmp = self.wan_convert(fans_tmp)
 
         try:
-            self.driver.get('https://weibo.com/ajax/profile/info?custom=1006067062715824')
+            webo_url = self.driver.current_url
+            pid = re.search(r'/(\d+)', webo_url).group(1)
+
+            self.driver.get(f'https://weibo.com/ajax/profile/info?custom={pid}')
 
             # Selenium 网页源码转换为 json
             html = self.driver.page_source
