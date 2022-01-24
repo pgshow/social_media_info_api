@@ -155,7 +155,7 @@ class Douyin:
         title = soup.select_one('h1').text
 
         try:
-            author = selector.xpath(r'//*[@id="root"]/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/a/div/span/span/span/span/span//text()')[0]
+            author = selector.xpath(r'//*[@id="root"]/div/div[2]/div/div/div[2]/div/div[1]/div[2]/a/div/span/span/span/span/span/text()')[0]
         except:
             raise Exception("can't find author")
 
